@@ -5,6 +5,14 @@ tasks:
   - name: Run RavenDB Docker Container
     init: docker run --rm -d -p 8080:8080 -p 38888:38888 --name RavenDB -e RAVEN_Setup_Mode=None -e RAVEN_License_Eula_Accepted=true -e RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork ravendb/ravendb
 
+ports:
+  - port: 5000
+    onOpen: open-browser
+    visibility: private
+  - port: 8080
+    onOpen: open-browser
+    visibility: private
+
 vscode:
   extensions:
     - muhammad-sammy.csharp
