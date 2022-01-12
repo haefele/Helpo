@@ -4,6 +4,8 @@ image:
 tasks:
   - name: Run RavenDB Docker Container
     init: docker run --rm -d -p 8080:8080 -p 38888:38888 --name RavenDB -e RAVEN_Setup_Mode=None -e RAVEN_License_Eula_Accepted=true -e RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork ravendb/ravendb
+  - name: Set .NET Environment Variables
+    before: gp env DOTNET_ENVIRONMENT=Development && gp env DOTNET_URLS=http://localhost:5000
 
 ports:
   - port: 5000

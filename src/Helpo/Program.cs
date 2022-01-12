@@ -28,4 +28,4 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-app.Run("http://localhost:5000");
+app.Run();
