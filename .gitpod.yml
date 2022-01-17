@@ -22,3 +22,5 @@ ports:
 vscode:
   extensions:
     - muhammad-sammy.csharp
+    - jsw.csharpextensions
+    - pkief.material-icon-theme
