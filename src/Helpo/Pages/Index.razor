@@ -1,5 +1,19 @@
 ﻿@page "/"
+@using Services
 
 <PageTitle>Home</PageTitle>
 
-<MudText>Hello World</MudText>
+<MudText>Hello World @Id</MudText>
+
+@code 
+{
+    [Inject]
+    public IdFactory IdFactory {get;set;} = default!;
+
+    public string Id {get;set;} = "Standard";
+
+    protected override void OnInitialized()
+    {
+        this.Id = this.IdFactory.GenerateId();
+    }
+}
