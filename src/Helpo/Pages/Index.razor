@@ -7,13 +7,4 @@
 {
     [Inject]
     public SessionManager SessionManager {get;set;} = default!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        using var session = this.SessionManager.StartSession();
-
-        var application = await session.ApplicationsService.AddNewApplication("Test-Application", new());
-
-        await session.SaveChangesAsync();
-    }
 }
