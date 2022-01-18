@@ -9,7 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
+
+// RavenDB
+
+// Session Manager
+builder.Services.AddSingleton<SessionManager>();
+
+// Services
 builder.Services.AddSingleton<IdFactory>();
+builder.Services.AddScoped<ApplicationsService>();
 
 var app = builder.Build();
 

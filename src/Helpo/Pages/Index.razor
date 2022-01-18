@@ -3,17 +3,17 @@
 
 <PageTitle>Home</PageTitle>
 
-<MudText>Hello World @Id</MudText>
-
 @code 
 {
     [Inject]
-    public IdFactory IdFactory {get;set;} = default!;
+    public SessionManager SessionManager {get;set;} = default!;
 
-    public string Id {get;set;} = "Standard";
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        this.Id = this.IdFactory.GenerateId();
+        using var session = this.SessionManager.StartSession();
+
+        var application = await session.ApplicationsService.AddNewApplication("Test-Application", new());
+
+        await session.SaveChangesAsync();
     }
 }
