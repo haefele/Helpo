@@ -19,7 +19,7 @@ namespace Helpo.Services
             this._documentSession = documentSession;
         }
 
-        public async Task<Application> AddNewApplication(string name, List<string> versions, CancellationToken token = default)
+        public async Task<Application> AddNewApplication(string name, List<Version> versions, CancellationToken token = default)
         {
             Guard.IsNotNullOrWhiteSpace(name, nameof(name));
             Guard.IsNotNull(versions, nameof(versions));

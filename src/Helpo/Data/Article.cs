@@ -10,6 +10,6 @@ public class Article : BaseEntity
 
 public class ArticleContent
 {
-    public string ValidFromVersion { get; set; } = string.Empty;
+    public Version ValidFromVersion { get; set; } = default!;
     public string Content { get; set; } = string.Empty;
 }
