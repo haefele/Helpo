@@ -13,6 +13,8 @@ tasks:
     init: | 
       eval $(gp env -e)
       dotnet build ./src/Helpo/Helpo.csproj
+  - name: Pull RavenDB Docker Container
+    init: docker pull ravendb/ravendb
   - name: Run RavenDB Docker Container
     command: docker run --rm -d -p 8080:8080 -p 38888:38888 --name RavenDB -e RAVEN_Setup_Mode=None -e RAVEN_License_Eula_Accepted=true -e RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork ravendb/ravendb
 
