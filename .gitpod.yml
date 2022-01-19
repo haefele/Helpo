@@ -21,6 +21,21 @@ ports:
     onOpen: notify
     visibility: private
 
+gitConfig:
+  format.pretty: "oneline"
+  fetch.prune: "true"
+  alias.b: "!git checkout -b"
+  alias.s: "!git status"
+  alias.m: "!git checkout main"
+  alias.mp: "!git checkout main; git pull;"
+  alias.branchname: "!git rev-parse --abbrev-ref HEAD"
+  alias.pub: "!git push -u origin $(git branchname)"
+  alias.ca: "!git add -A; git commit -m"
+  alias.fix: "!git add -A; git commit --amend --no-edit"
+  alias.rebaseonm: "!git rebase --onto main main $(git branchname)"
+  alias.mbranches: "!git branch -vv | grep ': gone]' | awk '{print $1}'"
+  alias.delmbranches: "!git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -D"
+
 vscode:
   extensions:
     - muhammad-sammy.csharp
