@@ -11,7 +11,7 @@ namespace Helpo.Services
     public class ApplicationsService
     {
         private readonly IdFactory _idFactory;
-        private IAsyncDocumentSession _documentSession;
+        private readonly IAsyncDocumentSession _documentSession;
 
         public ApplicationsService(IdFactory idFactory, IAsyncDocumentSession documentSession)
         {
