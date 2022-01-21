@@ -2,6 +2,7 @@ using System.Reflection;
 using Helpo.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using MudBlazor.Services;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Indexes;
@@ -40,6 +41,9 @@ builder.Services.AddSingleton<SessionManager>();
 // Services
 builder.Services.AddSingleton<IdFactory>();
 builder.Services.AddScoped<ApplicationsService>();
+
+// Move shared blazor controls into the /Shared subdirectory
+builder.Services.Configure<RazorPagesOptions>(f => f.RootDirectory = "/Shared");
 
 var app = builder.Build();
 
