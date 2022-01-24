@@ -5,10 +5,25 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+    <MudAppBar Elevation="1">
+        <MudTooltip Text="@(_drawerOpen ? "Hide menu" : "Show menu")">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        </MudTooltip>
         <MudText Typo="Typo.h5" Class="ml-3">Helpo</MudText>
         <MudSpacer />
+
+        <AuthorizeView>
+            <Authorized>
+                <MudTooltip Text="Logout">
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.Start" OnClick="this.Logout" />
+                </MudTooltip>
+            </Authorized>
+            <NotAuthorized>
+                <MudTooltip Text="Login">
+                    <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" Edge="Edge.Start" OnClick="this.NavigateToLoginPage" />
+                </MudTooltip>
+            </NotAuthorized>
+        </AuthorizeView>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
@@ -21,10 +36,23 @@
 </MudLayout>
 
 @code {
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
     private bool _drawerOpen = true;
 
     private void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    private void Logout()
+    {
+        this.NavigationManager.NavigateTo("auth/logout", forceLoad: true);
+    }
+
+    private void NavigateToLoginPage()
+    {
+        this.NavigationManager.NavigateTo("auth/login");
     }
 }

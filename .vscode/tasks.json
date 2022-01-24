@@ -27,6 +27,15 @@
                 "${workspaceFolder}/src/Helpo/Helpo.csproj",
             ],
             "problemMatcher": "$msCompile",
+        },
+        {
+            "label": "restore",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "restore",
+            ],
+            "problemMatcher": "$msCompile",
         }
     ]
 }

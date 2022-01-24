@@ -1,0 +1,55 @@
+﻿@code {
+
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+    [Parameter]
+    public EventCallback<string?> ErrorMessageChanged { get; set; }
+
+    [Parameter]
+    public bool HasError { get; set; }
+    [Parameter]
+    public EventCallback<bool> HasErrorChanged { get; set; }
+
+    [Parameter]
+    public EventCallback Execute { get; set; }
+
+    [Parameter]
+    public bool IsExecuting { get; set; }
+    [Parameter]
+    public EventCallback<bool> IsExecutingChanged { get; set; }
+
+    public async Task Run()
+    {
+        if (this.IsExecuting)
+            return;
+
+        this.IsExecuting = true;
+        await this.IsExecutingChanged.InvokeAsync(this.IsExecuting);
+        
+        this.ErrorMessage = null;
+        await this.ErrorMessageChanged.InvokeAsync(this.ErrorMessage);
+
+        this.HasError = false;
+        await this.HasErrorChanged.InvokeAsync(this.HasError);
+
+        try
+        {
+            await this.Execute.InvokeAsync();
+        }
+        catch (Exception exception)
+        {
+            this.ErrorMessage = exception.Message;
+            await this.ErrorMessageChanged.InvokeAsync(this.ErrorMessage);
+            
+            this.HasError = true;
+            await this.HasErrorChanged.InvokeAsync(this.HasError);
+        }
+        finally 
+        {
+            this.IsExecuting = false;
+            await this.IsExecutingChanged.InvokeAsync(this.IsExecuting);
+
+            this.StateHasChanged();
+        }
+    }
+}

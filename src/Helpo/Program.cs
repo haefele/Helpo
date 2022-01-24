@@ -1,5 +1,9 @@
 using System.Reflection;
+using CentronSoftware.Centron.WebServices.Connections;
 using Helpo.Services;
+using Helpo.Shared.Auth;
+using Helpo.Shared.Users;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,6 +18,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
+builder.Services.AddHttpContextAccessor();
+
+// Authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => 
+                {
+                    options.LoginPath = "/auth/complete_login";
+                    options.LogoutPath = "/auth/logout";
+                });
 
 // RavenDB
 builder.Services.AddSingleton<IDocumentStore>(serviceProvider => 
@@ -25,7 +38,7 @@ builder.Services.AddSingleton<IDocumentStore>(serviceProvider =>
     store.Database = builder.Configuration.GetValue<string>("RavenDB:DatabaseName");
     store.Initialize();
 
-    IndexCreation.CreateIndexes(typeof(SessionManager).Assembly, store);
+    IndexCreation.CreateIndexes(typeof(Index).Assembly, store);
 
     return store;
 });
@@ -35,12 +48,19 @@ builder.Services.AddScoped<IAsyncDocumentSession>(serviceProvider =>
     return store.OpenAsyncSession();
 });
 
-// Session Manager
-builder.Services.AddSingleton<SessionManager>();
-
 // Services
 builder.Services.AddSingleton<IdFactory>();
 builder.Services.AddScoped<ApplicationsService>();
+builder.Services.AddScoped(serviceProvider => 
+{    
+    var url = builder.Configuration.GetValue<string>("CentronWebService:Url");
+    var applicationGuid = builder.Configuration.GetValue<string>("CentronWebService:ApplicationGuid");
+
+    var webService = new CentronWebService(url);
+    return ActivatorUtilities.CreateInstance<AuthService>(serviceProvider, webService, applicationGuid);
+});
+builder.Services.AddScoped<UsersService>();
+builder.Services.AddScoped<CurrentUserService>();
 
 // Move shared blazor controls into the /Shared subdirectory
 builder.Services.Configure<RazorPagesOptions>(f => f.RootDirectory = "/Shared");
@@ -61,6 +81,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

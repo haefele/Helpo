@@ -1,10 +1,21 @@
 ﻿@page "/"
-@using Services
+@using Helpo.Shared.Auth
+@inject CurrentUserService CurrentUserService
 
 <PageTitle>Home</PageTitle>
 
+<AuthorizeView>
+    <Authorized>
+        <MudText>@_user?.Name</MudText>
+    </Authorized>
+</AuthorizeView>
+
 @code 
 {
-    [Inject]
-    public SessionManager SessionManager {get;set;} = default!;
+    private CurrentUser? _user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = await this.CurrentUserService.GetCurrentUser();
+    }
 }

@@ -1,0 +1,79 @@
+﻿@page "/auth/login"
+
+<PageTitle>Login</PageTitle>
+
+<EditForm Model="@this" OnValidSubmit="@(() => this.LoginCommand.Run())">
+    <DataAnnotationsValidator />
+
+    <MudContainer MaxWidth="MaxWidth.Small">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h5">Login</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField Label="Username" 
+                              @bind-Value="this.Username" 
+                              For="@(() => this.Username)" 
+                              Disabled="@this.LoginCommand.IsExecuting" 
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Filled.Person"
+                              Variant="Variant.Outlined" />
+                <MudTextField Label="Password" 
+                              @bind-Value="this.Password" 
+                              For="@(() => this.Password)" 
+                              Disabled="@this.LoginCommand.IsExecuting"                               
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@(this._showPassword ? Icons.Filled.Visibility : Icons.Filled.VisibilityOff)"
+                              OnAdornmentClick="@(() => this._showPassword = !this._showPassword)"
+                              Variant="Variant.Outlined"
+                              InputType="@(this._showPassword ? InputType.Text : InputType.Password)" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" 
+                           Variant="Variant.Filled" 
+                           EndIcon="@Icons.Filled.Login"
+                           Color="Color.Primary" 
+                           class="ml-auto mr-2 mb-2" 
+                           Size="Size.Large"
+                           disabled="@this.LoginCommand.IsExecuting">Login</MudButton>
+            </MudCardActions>
+        </MudCard>
+        
+        @if (this.LoginCommand.IsExecuting)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+        }
+
+        @if (this.LoginCommand.HasError)
+        {
+            <MudAlert Severity="Severity.Error" class="mt-4">@this.LoginCommand.ErrorMessage</MudAlert>
+        }
+    </MudContainer>
+</EditForm>
+
+<HelpoCommand @ref="LoginCommand" Execute="@OnLogin" />
+
+@code {
+    [Inject]
+    public AuthService AuthService { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager NavigationService { get; set; } = default!;
+
+    [Required]
+    public string? Username { get; set; }
+    [Required]
+    public string? Password { get; set; }
+
+    private bool _showPassword;
+
+    public HelpoCommand LoginCommand = default!;
+
+    private async Task OnLogin()
+    {
+        var ticket = await this.AuthService.Login(this.Username, this.Password);
+        this.NavigationService.NavigateTo("auth/complete_login?ticket=" + ticket, forceLoad: true);
+    }
+}
