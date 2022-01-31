@@ -37,14 +37,19 @@
                            Color="Color.Primary" 
                            class="ml-auto mr-2 mb-2" 
                            Size="Size.Large"
-                           disabled="@this.LoginCommand.IsExecuting">Login</MudButton>
+                           disabled="@this.LoginCommand.IsExecuting">
+                    @if (this.LoginCommand.IsExecuting)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                        <MudText Class="ms-2">Logging in</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Login</MudText>
+                    }
+                </MudButton>
             </MudCardActions>
         </MudCard>
-        
-        @if (this.LoginCommand.IsExecuting)
-        {
-            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-        }
 
         @if (this.LoginCommand.HasError)
         {
