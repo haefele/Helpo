@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Helpo.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Toolkit.Diagnostics;
+using CommunityToolkit.Diagnostics;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 

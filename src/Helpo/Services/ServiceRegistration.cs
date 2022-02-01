@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CentronSoftware.Centron.WebServices.Connections;
 using Helpo.Shared.Auth;
 using Helpo.Shared.Users;
-using Microsoft.Toolkit.Diagnostics;
+using CommunityToolkit.Diagnostics;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Indexes;
 using Raven.Client.Documents.Operations;
