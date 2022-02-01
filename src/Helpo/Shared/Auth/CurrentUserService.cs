@@ -44,4 +44,14 @@ public class CurrentUserService
 
         return CurrentUser.FromClaimsPrincipal(user);
     }
+
+    public async Task<CurrentUser> GetRequiredCurrentUser()
+    {
+        var currentUser = await this.GetCurrentUser();
+        
+        if (currentUser is null)
+            throw new Exception("You have to be logged in for this operation.");
+
+        return currentUser;
+    }
 }
