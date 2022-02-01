@@ -4,8 +4,9 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Centron.Core.Extensions;
 
-namespace CommunityToolkit.Mvvm.Input;
+namespace Helpo.Shared.Commands;
 
 public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
 {
@@ -16,6 +17,8 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
     internal static readonly PropertyChangedEventArgs IsCancellationRequestedChangedEventArgs = new(nameof(IsCancellationRequested));
 
     internal static readonly PropertyChangedEventArgs IsRunningChangedEventArgs = new(nameof(IsRunning));
+
+    internal static readonly PropertyChangedEventArgs ErrorMessageChangedEventArgs = new(nameof(ErrorMessage));
 
     private readonly Func<Task>? execute;
 
@@ -36,7 +39,7 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
         ArgumentNullException.ThrowIfNull(execute);
 
         this.execute = execute;
-        this.allowConcurrentExecutions = true;
+        this.allowConcurrentExecutions = false;
     }
 
     public AsyncRelayCommand(Func<Task> execute, bool allowConcurrentExecutions)
@@ -52,7 +55,7 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
         ArgumentNullException.ThrowIfNull(cancelableExecute);
 
         this.cancelableExecute = cancelableExecute;
-        this.allowConcurrentExecutions = true;
+        this.allowConcurrentExecutions = false;
     }
 
     public AsyncRelayCommand(Func<CancellationToken, Task> cancelableExecute, bool allowConcurrentExecutions)
@@ -70,7 +73,7 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
 
         this.execute = execute;
         this.canExecute = canExecute;
-        this.allowConcurrentExecutions = true;
+        this.allowConcurrentExecutions = false;
     }
 
     public AsyncRelayCommand(Func<Task> execute, Func<bool> canExecute, bool allowConcurrentExecutions)
@@ -90,7 +93,7 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
 
         this.cancelableExecute = cancelableExecute;
         this.canExecute = canExecute;
-        this.allowConcurrentExecutions = true;
+        this.allowConcurrentExecutions = false;
     }
 
     public AsyncRelayCommand(Func<CancellationToken, Task> cancelableExecute, Func<bool> canExecute, bool allowConcurrentExecutions)
@@ -154,6 +157,8 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
 
     public bool IsRunning => ExecutionTask?.IsCompleted == false;
 
+    public string? ErrorMessage { get; private set; }
+
     public void NotifyCanExecuteChanged()
     {
         CanExecuteChanged?.Invoke(this, EventArgs.Empty);
@@ -179,7 +184,7 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
             // Non cancelable command delegate
             if (this.execute is not null)
             {
-                return ExecutionTask = this.execute();
+                return ExecutionTask = this.ExecuteInternal();
             }
 
             // Cancel the previous operation, if one is pending
@@ -190,10 +195,42 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
             PropertyChanged?.Invoke(this, IsCancellationRequestedChangedEventArgs);
 
             // Invoke the cancelable command delegate with a new linked token
-            return ExecutionTask = this.cancelableExecute!(cancellationTokenSource.Token);
+            return ExecutionTask = this.CancellableExecuteInternal(cancellationTokenSource.Token);
         }
 
         return Task.CompletedTask;
+    }
+
+    private async Task ExecuteInternal()
+    {
+        try 
+        {
+            this.ErrorMessage = null;
+            this.PropertyChanged?.Invoke(this, ErrorMessageChangedEventArgs);
+
+            await this.execute!();
+        }
+        catch (Exception exception)
+        {
+            this.ErrorMessage = exception.GetFullMessage();
+            this.PropertyChanged?.Invoke(this, ErrorMessageChangedEventArgs);
+        }
+    }
+
+    private async Task CancellableExecuteInternal(CancellationToken token)
+    {
+        try 
+        {
+            this.ErrorMessage = null;
+            this.PropertyChanged?.Invoke(this, ErrorMessageChangedEventArgs);
+
+            await this.cancelableExecute!(token);
+        }
+        catch (Exception exception) when (this.IsCancellationRequested is false)
+        {
+            this.ErrorMessage = exception.GetFullMessage();
+            this.PropertyChanged?.Invoke(this, ErrorMessageChangedEventArgs);
+        }
     }
 
     public void Cancel()

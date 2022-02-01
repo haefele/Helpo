@@ -2,7 +2,7 @@
 
 <PageTitle>Login</PageTitle>
 
-<EditForm Model="@this" OnValidSubmit="@(() => this.LoginCommand.Run())">
+<EditForm Model="@this" OnValidSubmit="@(() => this._loginCommand.ExecuteAsync(null))">
     <DataAnnotationsValidator />
 
     <MudContainer MaxWidth="MaxWidth.Small">
@@ -16,14 +16,14 @@
                 <MudTextField Label="Username" 
                               @bind-Value="this.Username" 
                               For="@(() => this.Username)" 
-                              Disabled="@this.LoginCommand.IsExecuting" 
+                              Disabled="@this._loginCommand.IsRunning" 
                               Adornment="Adornment.End"
                               AdornmentIcon="@Icons.Filled.Person"
                               Variant="Variant.Outlined" />
                 <MudTextField Label="Password" 
                               @bind-Value="this.Password" 
                               For="@(() => this.Password)" 
-                              Disabled="@this.LoginCommand.IsExecuting"                               
+                              Disabled="@this._loginCommand.IsRunning"                               
                               Adornment="Adornment.End"
                               AdornmentIcon="@(this._showPassword ? Icons.Filled.Visibility : Icons.Filled.VisibilityOff)"
                               OnAdornmentClick="@(() => this._showPassword = !this._showPassword)"
@@ -37,8 +37,8 @@
                            Color="Color.Primary" 
                            class="ml-auto mr-2 mb-2" 
                            Size="Size.Large"
-                           disabled="@this.LoginCommand.IsExecuting">
-                    @if (this.LoginCommand.IsExecuting)
+                           disabled="@this._loginCommand.IsRunning">
+                    @if (this._loginCommand.IsRunning)
                     {
                         <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
                         <MudText Class="ms-2">Logging in</MudText>
@@ -51,14 +51,12 @@
             </MudCardActions>
         </MudCard>
 
-        @if (this.LoginCommand.HasError)
+        @if (this._loginCommand.ErrorMessage != null)
         {
-            <MudAlert Severity="Severity.Error" class="mt-4">@this.LoginCommand.ErrorMessage</MudAlert>
+            <MudAlert Severity="Severity.Error" class="mt-4">@this._loginCommand.ErrorMessage</MudAlert>
         }
     </MudContainer>
 </EditForm>
-
-<HelpoCommand @ref="LoginCommand" Execute="@OnLogin" />
 
 @code {
     [Inject]
@@ -74,7 +72,12 @@
 
     private bool _showPassword;
 
-    public HelpoCommand LoginCommand = default!;
+    private AsyncRelayCommand _loginCommand;
+
+    public Login()
+    {
+        this._loginCommand = new AsyncRelayCommand(this.OnLogin);
+    }
 
     private async Task OnLogin()
     {
