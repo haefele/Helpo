@@ -1,8 +1,78 @@
 ﻿@page "/questions/ask"
 @attribute [Authorize]
 
-<h3>AskQuestion</h3>
+<PageTitle>Ask question</PageTitle>
+
+<EditForm Model="@this" OnValidSubmit="@(() => this._askQuestionCommand.ExecuteAsync(null))">
+    <DataAnnotationsValidator />
+
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h5">Ask a new question</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField Label="Title" 
+                              @bind-Value="this.Title" 
+                              For="@(() => this.Title)"
+                              HelperText="Use a short but descriptive title for your question" 
+                              Disabled="@this._askQuestionCommand.IsRunning" 
+                              Variant="Variant.Outlined" />
+                <MudTextField Label="Question" 
+                              @bind-Value="this.Question" 
+                              For="@(() => this.Question)" 
+                              HelperText="Explain your question in as much detail as possible. Remember to give context. Where are you, what are you doing, what is happening etc."
+                              Disabled="@this._askQuestionCommand.IsRunning"                               
+                              Variant="Variant.Outlined"
+                              Lines="5" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" 
+                           Variant="Variant.Filled" 
+                           EndIcon="@Icons.Filled.Login"
+                           Color="Color.Primary" 
+                           class="ml-auto mr-2 mb-2" 
+                           Size="Size.Large"
+                           disabled="@this._askQuestionCommand.IsRunning">
+                    @if (this._askQuestionCommand.IsRunning)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                        <MudText Class="ms-2">Posting question</MudText>
+                    }
+                    else
+                    {
+                        <MudText>ASK QUESTION</MudText>
+                    }
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+
+        @if (this._askQuestionCommand.ErrorMessage != null)
+        {
+            <MudAlert Severity="Severity.Error" Elevation="1" class="mt-4">@this._askQuestionCommand.ErrorMessage</MudAlert>
+        }
+    </MudContainer>
+</EditForm>
 
 @code {
+    [Required]
+    public string? Title { get; set; }
 
+    [Required]
+    public string? Question { get; set; }
+
+    private AsyncRelayCommand _askQuestionCommand;
+
+    public AskQuestion()
+    {
+        this._askQuestionCommand = new AsyncRelayCommand(this.OnAskQuestion);
+    }
+
+    private async Task OnAskQuestion() 
+    {
+        await Task.Delay(TimeSpan.FromSeconds(3));
+        throw new Exception("You fuckin bonobo!");
+    }
 }
