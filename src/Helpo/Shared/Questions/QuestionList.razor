@@ -1,0 +1,15 @@
+﻿@page "/questions"
+
+<AuthorizeView>
+    <Authorized>
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Primary"
+                   Link="/questions/ask">
+            Ask new question
+        </MudButton>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    
+}
