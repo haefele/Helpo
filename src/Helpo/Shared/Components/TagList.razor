@@ -1,0 +1,34 @@
+﻿@foreach (var tag in this.Tags)
+{
+    <MudChip class="my-n2">@tag</MudChip>
+}
+
+<MudInput @bind-Value="@NewTagName" DisableUnderLine="true" Placeholder="Tag name" OnKeyDown="@OnKeyDown" />
+
+@code {
+
+    public string NewTagName { get; set; } = string.Empty;
+    private void OnKeyDown(KeyboardEventArgs eventArgs)
+    {
+        if (eventArgs.Key == "Enter")
+            this.AddAdornment();
+    }
+    private void AddAdornment()
+    {
+        if (string.IsNullOrWhiteSpace(this.NewTagName))
+            return;
+
+        this.Tags.Add(this.NewTagName);
+        this.NewTagName = string.Empty;
+
+        this.StateHasChanged();
+    }
+
+    public List<string> Tags { get; set; } = new();
+
+    public TagList()
+    {
+        this.Tags.Add("Hallo");
+        this.Tags.Add("Welt");
+    }
+}

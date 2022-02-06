@@ -27,6 +27,11 @@
                               Disabled="@this._askQuestionCommand.IsRunning"                               
                               Variant="Variant.Outlined"
                               Lines="5" />
+                <MudField Label="Tags" 
+                          Disabled="@this._askQuestionCommand.IsRunning"                               
+                          Variant="Variant.Outlined">
+                    <TagList />
+                </MudField>
             </MudCardContent>
             <MudCardActions>
                 <MudButton ButtonType="ButtonType.Submit" 
