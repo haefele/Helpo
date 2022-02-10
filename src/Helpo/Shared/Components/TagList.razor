@@ -1,27 +1,50 @@
 ﻿@foreach (var tag in this.Tags)
 {
-    <MudChip class="my-n2">@tag</MudChip>
+    <MudChip class="">@tag</MudChip>
 }
 
-<MudInput @bind-Value="@NewTagName" DisableUnderLine="true" Placeholder="Tag name" OnKeyDown="@OnKeyDown" />
+<form onsubmit="return false;" class="d-inline">
+    <div class="mud-input my-1">
+        <input @bind="NewTagName" 
+               @bind:event="oninput"
+            class="mud-input-slot mud-input-root"
+            placeholder="Tag name"        
+            @onkeydown="@OnKeyUp">
+    </div>
+</form>
 
 @code {
 
     public string NewTagName { get; set; } = string.Empty;
-    private void OnKeyDown(KeyboardEventArgs eventArgs)
+
+    private void OnKeyUp(KeyboardEventArgs eventArgs)
     {
-        if (eventArgs.Key == "Enter")
+        if (eventArgs.Code == "Enter")
             this.AddAdornment();
+        else if (eventArgs.Code == "Backspace")
+            this.RemoveLastTag();
     }
     private void AddAdornment()
     {
         if (string.IsNullOrWhiteSpace(this.NewTagName))
             return;
 
-        this.Tags.Add(this.NewTagName);
+        this.Tags.Add(this.NewTagName.Trim());
         this.NewTagName = string.Empty;
+    }
 
-        this.StateHasChanged();
+    private void RemoveLastTag()
+    {
+        if (string.IsNullOrEmpty(this.NewTagName) is false)
+            return;        
+
+        if (this.Tags.Any())
+        {
+            var lastTag = this.Tags.Last();
+            this.Tags.RemoveAt(this.Tags.Count - 1);
+
+            this.NewTagName = lastTag;
+        }
     }
 
     public List<string> Tags { get; set; } = new();

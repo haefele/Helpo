@@ -27,7 +27,8 @@
                               Disabled="@this._askQuestionCommand.IsRunning"                               
                               Variant="Variant.Outlined"
                               Lines="5" />
-                <MudField Label="Tags" 
+                <MudField Label="Tags"
+                          For="@(() => this.Question)"
                           Disabled="@this._askQuestionCommand.IsRunning"                               
                           Variant="Variant.Outlined">
                     <TagList />
