@@ -31,7 +31,7 @@
                           For="@(() => this.Question)"
                           Disabled="@this._askQuestionCommand.IsRunning"                               
                           Variant="Variant.Outlined">
-                    <TagList />
+                    <TagList @bind-Tags="Tags" Disabled="@this._askQuestionCommand.IsRunning" />
                 </MudField>
             </MudCardContent>
             <MudCardActions>
@@ -68,6 +68,9 @@
 
     [Required]
     public string? Question { get; set; }
+
+    [Required]
+    public List<string> Tags { get; set; } = new();
 
     private AsyncRelayCommand _askQuestionCommand;
 

@@ -1,12 +1,13 @@
 ﻿@foreach (var tag in this.Tags)
 {
-    <MudChip class="">@tag</MudChip>
+    <MudChip Text="@tag" Disabled="@Disabled" OnClose="RemoveThisTag"></MudChip>
 }
 
 <form onsubmit="return false;" class="d-inline">
     <div class="mud-input my-1">
         <input @bind="NewTagName" 
                @bind:event="oninput"
+               disabled="@this.Disabled"
             class="mud-input-slot mud-input-root"
             placeholder="Tag name"        
             @onkeydown="@OnKeyUp">
@@ -14,44 +15,58 @@
 </form>
 
 @code {
+    [Parameter]
+    public List<string> Tags { get; set; } = new();
+    [Parameter]
+    public EventCallback<List<string>> TagsChanged { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
 
     public string NewTagName { get; set; } = string.Empty;
 
-    private void OnKeyUp(KeyboardEventArgs eventArgs)
+    private async Task OnKeyUp(KeyboardEventArgs eventArgs)
     {
         if (eventArgs.Code == "Enter")
-            this.AddAdornment();
+            await this.AddAdornment();
         else if (eventArgs.Code == "Backspace")
-            this.RemoveLastTag();
+            await this.RemoveLastTag();
     }
-    private void AddAdornment()
+    private async Task AddAdornment()
     {
         if (string.IsNullOrWhiteSpace(this.NewTagName))
             return;
+            
+        var newTagNameTrimmed = this.NewTagName.Trim();
+        
+        // Dont allow duplicate tags
+        if (this.Tags.Contains(newTagNameTrimmed) == false)
+            this.Tags.Add(this.NewTagName.Trim());
 
-        this.Tags.Add(this.NewTagName.Trim());
         this.NewTagName = string.Empty;
+
+        await this.TagsChanged.InvokeAsync(this.Tags);
     }
 
-    private void RemoveLastTag()
+    private async Task RemoveLastTag()
     {
         if (string.IsNullOrEmpty(this.NewTagName) is false)
-            return;        
-
+            return;       
+            
         if (this.Tags.Any())
         {
             var lastTag = this.Tags.Last();
             this.Tags.RemoveAt(this.Tags.Count - 1);
 
             this.NewTagName = lastTag;
+            
+            await this.TagsChanged.InvokeAsync(this.Tags);
         }
     }
 
-    public List<string> Tags { get; set; } = new();
-
-    public TagList()
+    private async Task RemoveThisTag(MudChip chip)
     {
-        this.Tags.Add("Hallo");
-        this.Tags.Add("Welt");
+        this.Tags.Remove(chip.Text);
+        await this.TagsChanged.InvokeAsync(this.Tags);
     }
 }
