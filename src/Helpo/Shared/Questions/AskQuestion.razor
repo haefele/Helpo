@@ -27,12 +27,12 @@
                               Disabled="@this._askQuestionCommand.IsRunning"                               
                               Variant="Variant.Outlined"
                               Lines="5" />
-                <MudField Label="Tags"
-                          For="@(() => this.Question)"
-                          Disabled="@this._askQuestionCommand.IsRunning"                               
-                          Variant="Variant.Outlined">
-                    <TagList @bind-Tags="Tags" Disabled="@this._askQuestionCommand.IsRunning" />
-                </MudField>
+                <MudTextField Label="Tags" 
+                              @bind-Value="this.Tags" 
+                              For="@(() => this.Tags)" 
+                              HelperText="Add some comma separated tags to this question, like the area your question touches on."
+                              Disabled="@this._askQuestionCommand.IsRunning"                               
+                              Variant="Variant.Outlined" />
             </MudCardContent>
             <MudCardActions>
                 <MudButton ButtonType="ButtonType.Submit" 
@@ -70,7 +70,7 @@
     public string? Question { get; set; }
 
     [Required]
-    public List<string> Tags { get; set; } = new();
+    public string? Tags { get; set; }
 
     private AsyncRelayCommand _askQuestionCommand;
 
@@ -81,7 +81,6 @@
 
     private async Task OnAskQuestion() 
     {
-        await Task.Delay(TimeSpan.FromSeconds(3));
-        throw new Exception("You fuckin bonobo!");
+        
     }
 }
