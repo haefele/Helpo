@@ -63,6 +63,9 @@
 </EditForm>
 
 @code {
+    [Inject]
+    public QuestionsService QuestionsService { get; set; } = default!;
+
     [Required]
     public string? Title { get; set; }
 
@@ -81,6 +84,8 @@
 
     private async Task OnAskQuestion() 
     {
-        
+        var actualTags = this.Tags!.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+        await this.QuestionsService.AskQuestion(this.Title!, this.Question!, actualTags, this._askQuestionCommand.CancellationToken);
     }
 }

@@ -14,6 +14,7 @@ using Raven.Client.Exceptions;
 using Raven.Client.Exceptions.Database;
 using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
+using Helpo.Shared.Questions;
 
 namespace Helpo.Services;
 
@@ -39,6 +40,7 @@ public static class ServiceRegistration
         });
         self.AddScoped<UsersService>();
         self.AddScoped<CurrentUserService>();
+        self.AddScoped<QuestionsService>();
     }
     
     private static void AddRavenDB(this IServiceCollection self, string url, string databaseName)

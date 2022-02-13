@@ -155,6 +155,8 @@ public sealed class AsyncRelayCommand : ICommand, INotifyPropertyChanged
 
     public bool IsCancellationRequested => this.cancellationTokenSource?.IsCancellationRequested == true;
 
+    public CancellationToken CancellationToken => this.cancellationTokenSource?.Token ?? default;
+
     public bool IsRunning => ExecutionTask?.IsCompleted == false;
 
     public string? ErrorMessage { get; private set; }

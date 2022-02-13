@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Diagnostics;
 using Helpo.Services;
 using Helpo.Shared.Auth;
-using Raven.Client.Documents.Session;
+using Raven.Client.Documents;
 using static Helpo.Extensions.RavenDbExtensions;
 
 namespace Helpo.Shared.Questions;
@@ -13,26 +13,28 @@ namespace Helpo.Shared.Questions;
 public class QuestionsService
 {
     private readonly CurrentUserService _currentUserService;
-    private readonly IAsyncDocumentSession _documentSession;
+    private readonly IDocumentStore _documentStore;
     private readonly IdFactory _idFactory;
 
-    public QuestionsService(CurrentUserService currentUserService, IAsyncDocumentSession documentSession, IdFactory idFactory)
+    public QuestionsService(CurrentUserService currentUserService, IDocumentStore documentStore, IdFactory idFactory)
     {
         Guard.IsNotNull(currentUserService, nameof(currentUserService));
-        Guard.IsNotNull(documentSession, nameof(documentSession));
+        Guard.IsNotNull(documentStore, nameof(documentStore));
         Guard.IsNotNull(idFactory, nameof(idFactory));
 
         this._idFactory = idFactory;
-        this._documentSession = documentSession;
+        this._documentStore = documentStore;
         this._currentUserService = currentUserService;        
     }
 
-    public async Task<Question> AskQuestion(string title, string content, List<string> tags)
+    public async Task<Question> AskQuestion(string title, string content, List<string> tags, CancellationToken cancellationToken)
     {
         Guard.IsNotNullOrWhiteSpace(title, nameof(title));
         Guard.IsNotNullOrWhiteSpace(content, nameof(content));
         Guard.IsNotNull(tags, nameof(tags));
 
+        using var session = this._documentStore.OpenAsyncSession();
+    
         var currentUser = await this._currentUserService.GetRequiredCurrentUser();
 
         var question = new Question 
@@ -45,19 +47,23 @@ public class QuestionsService
             AskedByUserId = currentUser.HelpoUserId
         };
 
-        await this._documentSession.StoreAsync(question);
+        await session.StoreAsync(question, cancellationToken);
+
+        await session.SaveChangesAsync(cancellationToken);
 
         return question;
     }
 
-    public async Task<Question> EditQuestion(string questionId, string? newTitle, string? newContent, List<string>? newTags)
+    public async Task<Question> EditQuestion(string questionId, string? newTitle, string? newContent, List<string>? newTags, CancellationToken cancellationToken)
     {
         Guard.IsNotNullOrWhiteSpace(questionId, nameof(questionId));
         // newTitle can be anything
         // newContent can be anything
         // newTags can be anything
 
-        var question = await this._documentSession.RequiredLoadAsync<Question>(questionId);
+        using var session = this._documentStore.OpenAsyncSession();
+
+        var question = await session.RequiredLoadAsync<Question>(questionId, cancellationToken);
         var currentUser = await this._currentUserService.GetRequiredCurrentUser();
 
         // TODO: Allow moderators or admins to edit questions from other people
@@ -72,16 +78,20 @@ public class QuestionsService
 
         if (newTags is not null)
             question.Tags = newTags;
+            
+        await session.SaveChangesAsync(cancellationToken);
 
         return question;
     }
 
-    public async Task<(Question, Answer)> AddAnswer(string questionId, string content)
+    public async Task<(Question, Answer)> AddAnswer(string questionId, string content, CancellationToken cancellationToken)
     {
         Guard.IsNotNullOrWhiteSpace(questionId, nameof(questionId));
         Guard.IsNotNullOrWhiteSpace(content, nameof(content));
         
-        var question = await this._documentSession.RequiredLoadAsync<Question>(questionId);
+        using var session = this._documentStore.OpenAsyncSession();
+
+        var question = await session.RequiredLoadAsync<Question>(questionId, cancellationToken);
         var currentUser = await this._currentUserService.GetRequiredCurrentUser();
 
         var answer = new Answer
@@ -92,17 +102,21 @@ public class QuestionsService
             AnswerByUserId = currentUser.HelpoUserId,
         };
         question.Answers.Add(answer);
+        
+        await session.SaveChangesAsync(cancellationToken);
 
         return (question, answer);
     }
 
-    public async Task<(Question, Answer)> EditAnswer(string questionId, string answerId, string newContent)
+    public async Task<(Question, Answer)> EditAnswer(string questionId, string answerId, string newContent, CancellationToken cancellationToken)
     {
         Guard.IsNotNullOrWhiteSpace(questionId, nameof(questionId));
         Guard.IsNotNullOrWhiteSpace(answerId, nameof(answerId));
         Guard.IsNotNullOrWhiteSpace(newContent, nameof(newContent));
         
-        var question = await this._documentSession.RequiredLoadAsync<Question>(questionId);
+        using var session = this._documentStore.OpenAsyncSession();
+
+        var question = await session.RequiredLoadAsync<Question>(questionId, cancellationToken);
 
         var answer = question.Answers.Single(f => f.Id == answerId);
         var currentUser = await this._currentUserService.GetRequiredCurrentUser();
@@ -112,6 +126,8 @@ public class QuestionsService
             throw new Exception("You can only edit your own answers.");
 
         answer.Content = newContent;
+        
+        await session.SaveChangesAsync(cancellationToken);
 
         return (question, answer);
     }
