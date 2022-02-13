@@ -29,7 +29,6 @@ public static class ServiceRegistration
             configuration.GetValue<string>("RavenDB:DatabaseName"));
 
         self.AddScoped<IdFactory>();
-        self.AddScoped<ApplicationsService>();
         self.AddScoped(serviceProvider => 
         {    
             var url = configuration.GetValue<string>("CentronWebService:Url");
@@ -62,11 +61,6 @@ public static class ServiceRegistration
             IndexCreation.CreateIndexes(typeof(Index).Assembly, store);
 
             return store;
-        });
-        self.AddScoped<IAsyncDocumentSession>(serviceProvider => 
-        {
-            var store = serviceProvider.GetRequiredService<IDocumentStore>();
-            return store.OpenAsyncSession();
         });
 
         void EnsureDatabaseExists(IDocumentStore documentStore)

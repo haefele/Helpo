@@ -64,7 +64,7 @@ public class AuthService
         throw new Exception(userLoginResponse.Message);
     }
 
-    public async Task<List<Claim>> GetClaims(string ticket)
+    public async Task<List<Claim>> GetClaims(string ticket, CancellationToken cancellationToken)
     {
         Guard.IsNotNullOrWhiteSpace(ticket, nameof(ticket));
 
@@ -82,7 +82,7 @@ public class AuthService
         var name = $"{loginInformations.Firstname} {loginInformations.Lastname}";
         var emailAddress = loginInformations.MailAdress;
 
-        var user = await this._usersService.EnsureUserExists(externalId, name, emailAddress);
+        var user = await this._usersService.EnsureUserExists(externalId, name, emailAddress, cancellationToken);
         return CurrentUser.GetClaims(user.Id, user.Name, user.EmailAddress);
     }
 }

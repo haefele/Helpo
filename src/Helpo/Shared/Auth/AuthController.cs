@@ -15,16 +15,14 @@ namespace Helpo.Shared.Auth;
 public class AuthController : Controller
 {
     [HttpGet("complete_login")]
-    public async Task<IActionResult> CompleteLogin([FromQuery]string ticket, [FromServices]AuthService authService, [FromServices]IAsyncDocumentSession documentSession, CancellationToken cancellationToken)
+    public async Task<IActionResult> CompleteLogin([FromQuery]string ticket, [FromServices]AuthService authService, CancellationToken cancellationToken)
     {
         //TODO: Support Redirect URLs
 
-        var claims = await authService.GetClaims(ticket);
+        var claims = await authService.GetClaims(ticket, cancellationToken);
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
-
-        await documentSession.SaveChangesAsync(cancellationToken);
 
         var redirectUrl = string.IsNullOrWhiteSpace(this.Request.PathBase)
             ? "/"
