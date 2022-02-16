@@ -131,4 +131,11 @@ public class QuestionsService
 
         return (question, answer);
     }
+
+    public async Task<List<Question>> GetQuestions(CancellationToken cancellationToken)
+    {
+        using var session = this._documentStore.OpenAsyncSession();
+
+        return await session.Query<Question>().ToListAsync(cancellationToken);
+    }
 }

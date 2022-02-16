@@ -90,7 +90,38 @@ public static class ServiceRegistration
         void CreateTestData(IDocumentStore documentStore)
         {
             Guard.IsNotNull(documentStore, nameof(documentStore));
-            // TODO: Create test data
+
+            using var session = documentStore.OpenSession();
+            const string UserId = "01FW28AKSXT80JCSVH7CDTP5HY";
+
+            session.Store(new User
+            {
+                Id = UserId,
+                ExternalId = "AppUser-319-ContactPerson-0",
+                Name = "Daniel Häfele",
+                EmailAddress = "haefele@c-entron.de"
+            });
+
+            for (int i = 0; i <= 50; i++)
+            {
+                session.Store(new Question
+                {
+                    Id = "01FW28D8S3EKKXMN25PMDJQ854",
+
+                    Title = "Test-Question " + i,
+                    Content = "Something something haha I don't know " + i,
+                    Tags = {
+                        "Fruits",
+                        "Baking",
+                        "Test"
+                    },
+
+                    AskedAt = DateTimeOffset.Now,
+                    AskedByUserId = UserId,
+                });
+            }
+
+            session.SaveChanges();
         }
     }
 }

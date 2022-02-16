@@ -10,6 +10,31 @@
     </Authorized>
 </AuthorizeView>
 
+<MudDataGrid Items="@Questions" class="mt-4" Height="500px" FixedFooter="true" FixedHeader="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Questions</MudText>
+    </ToolBarContent>
+    <Columns>
+        <Column T="Question" Field="Id" Title="Id" />
+        <Column T="Question" Field="Title" />
+        <Column T="Question" Field="Content" />
+        <Column T="Question" Field="Tags" />
+        <Column T="Question" Field="AskedByUserId" Title="Asked by" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="Question" />
+    </PagerContent>
+</MudDataGrid>
+
 @code {
-    
+
+    [Inject]
+    public QuestionsService QuestionsService { get; set; } = default!;
+
+    public List<Question> Questions { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Questions = await this.QuestionsService.GetQuestions(default);
+    }
 }
