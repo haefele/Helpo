@@ -106,7 +106,7 @@ public static class ServiceRegistration
             {
                 session.Store(new Question
                 {
-                    Id = "01FW28D8S3EKKXMN25PMDJQ854",
+                    Id = Ulid.NewUlid().ToString(),
 
                     Title = "Test-Question " + i,
                     Content = "Something something haha I don't know " + i,

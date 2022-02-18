@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using CommunityToolkit.Diagnostics;
 using Helpo.Services;
 using Helpo.Shared.Auth;
+using Helpo.Shared.Users;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Queries;
 using static Helpo.Extensions.RavenDbExtensions;
 
 namespace Helpo.Shared.Questions;
@@ -132,10 +134,38 @@ public class QuestionsService
         return (question, answer);
     }
 
-    public async Task<List<Question>> GetQuestions(CancellationToken cancellationToken)
+    public async Task<(List<QuestionViewModel> questions, int totalCount)> GetQuestions(int page, int pageSize, CancellationToken cancellationToken)
     {
         using var session = this._documentStore.OpenAsyncSession();
 
-        return await session.Query<Question>().ToListAsync(cancellationToken);
+        var questions = await session
+            .Query<Question>()
+            .Statistics(out var stats)
+            .Skip(page * pageSize)
+            .Take(pageSize)
+            .OrderByDescending(f => f.AskedAt) //Newest questions first
+            .Select(f => new QuestionViewModel 
+            {
+                QuestionId = f.Id,
+                HasAcceptedAnswer = f.AcceptedAnswerId != null,
+                Title = f.Title,
+                Content = f.Content,
+                Tags = f.Tags,
+                AskedBy = RavenQuery.Load<User>(f.AskedByUserId).Name,
+            })
+            .ToListAsync(cancellationToken);
+
+        return (questions, stats.TotalResults);
     }
+}
+
+
+public class QuestionViewModel 
+{
+    public string QuestionId { get; set; }
+    public bool HasAcceptedAnswer { get; set; }
+    public string Title { get; set; }
+    public string Content { get; set; }
+    public List<string> Tags { get; set; }
+    public string AskedBy { get; set; }
 }
