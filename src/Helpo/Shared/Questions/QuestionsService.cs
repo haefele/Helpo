@@ -136,6 +136,9 @@ public class QuestionsService
 
     public async Task<(List<QuestionViewModel> questions, int totalCount)> GetQuestions(int page, int pageSize, CancellationToken cancellationToken)
     {
+        Guard.IsGreaterThanOrEqualTo(page, 0, nameof(page));
+        Guard.IsGreaterThan(pageSize, 0, nameof(pageSize));
+
         using var session = this._documentStore.OpenAsyncSession();
 
         var questions = await session
@@ -151,7 +154,7 @@ public class QuestionsService
                 Title = f.Title,
                 Content = f.Content,
                 Tags = f.Tags,
-                AskedBy = RavenQuery.Load<User>(f.AskedByUserId).Name,
+                AskedByUser = RavenQuery.Load<User>(f.AskedByUserId).Name,
             })
             .ToListAsync(cancellationToken);
 
@@ -162,10 +165,10 @@ public class QuestionsService
 
 public class QuestionViewModel 
 {
-    public string QuestionId { get; set; }
+    public string QuestionId { get; set; } = default!;
     public bool HasAcceptedAnswer { get; set; }
-    public string Title { get; set; }
-    public string Content { get; set; }
-    public List<string> Tags { get; set; }
-    public string AskedBy { get; set; }
+    public string Title { get; set; } = default!;
+    public string Content { get; set; } = default!;
+    public List<string> Tags { get; set; } = new();
+    public string AskedByUser { get; set; } = default!;
 }

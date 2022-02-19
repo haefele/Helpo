@@ -12,14 +12,36 @@
 
 <MudDataGrid T="QuestionViewModel" class="mt-4" ServerData="@LoadQuestions" RowClick="@QuestionClicked" CurrentPage="@Page">
     <Columns>
-        @* <Column T="QuestionViewModel" Field="HasAcceptedAnswer" Title="Has Answer" /> *@
+        <Column T="QuestionViewModel" Field="HasAcceptedAnswer" Title="Has Answer">
+            <CellTemplate>
+                @if (@context.HasAcceptedAnswer)
+                {
+                    <MudTooltip Text="This question got answered.">
+                        <MudIcon Icon="@Icons.Filled.Check" Color="Color.Success" />
+                    </MudTooltip>
+                }
+                else 
+                {
+                    <MudTooltip Text="This question does not have an answer yet.">
+                        <MudIcon Icon="@Icons.Filled.QuestionMark" />
+                    </MudTooltip>
+                }
+            </CellTemplate>
+        </Column>
         <Column T="QuestionViewModel" Field="Title" />
         <Column T="QuestionViewModel" Field="Content" />
-        @* <Column T="QuestionViewModel" Field="Tags" />
-        <Column T="QuestionViewModel" Field="AskedByUser" Title="Asked by" /> *@
+        <Column T="QuestionViewModel" Field="Tags">
+            <CellTemplate>
+                @foreach(var tag in @context.Tags)
+                {
+                    <MudChip Text="@tag" class="my-n2" />
+                }
+            </CellTemplate>
+        </Column>
+        <Column T="QuestionViewModel" Field="AskedByUser" Title="Asked by" />
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="QuestionViewModel" />
+        <MudDataGridPager T="QuestionViewModel" DisableRowsPerPage="true" />
     </PagerContent>
 </MudDataGrid>
 
@@ -37,7 +59,7 @@
 
     private async Task<GridData<QuestionViewModel>> LoadQuestions(GridState<QuestionViewModel> state)
     {
-        this.NavigationManager.NavigateTo(this.NavigationManager.GetUriWithQueryParameter("page", state.Page));
+        this.NavigationManager.NavigateTo(this.NavigationManager.GetUriWithQueryParameter("page", state.Page), forceLoad: false, replace: true);
 
         var (questions, totalCount) = await this.QuestionsService.GetQuestions(state.Page, state.PageSize, default);
 
@@ -48,7 +70,7 @@
         return result;
     }
 
-    private async Task QuestionClicked(DataGridRowClickEventArgs<QuestionViewModel> args)
+    private void QuestionClicked(DataGridRowClickEventArgs<QuestionViewModel> args)
     {
         var question = args.Item;
     }
